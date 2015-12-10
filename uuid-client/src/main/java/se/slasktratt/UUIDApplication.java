@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,17 +27,17 @@ public class UUIDApplication {
     RestTemplate restTemplate;
     
     @Autowired
-    RibbonLoadBalancerClient ribbonClient;
+    LoadBalancerClient lbClient;
     
     @RequestMapping("/")
     public String uuid() throws Exception {
-    	URI server = ribbonClient.choose("uuid-service").getUri();
+    	URI server = lbClient.choose("uuid-service").getUri();
     	AsyncRestTemplate template = new AsyncRestTemplate();
     	return "From uuid-service: " + server + " : " + template.getForEntity(server +"/uuid", UUID.class).get().getBody().toString();
     }
     
     @RequestMapping("/choose")
     public String getServices() {
-    	return ribbonClient.choose("uuid-service").getUri().toString();
+    	return lbClient.choose("uuid-service").getUri().toString();
     }
 }
